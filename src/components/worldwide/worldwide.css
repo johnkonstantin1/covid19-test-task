@@ -1,0 +1,19 @@
+/* .worldwide-container {
+    display: flex;
+    justify-content: center;
+  } */
+
+  .worldwide-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .chart-container {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
