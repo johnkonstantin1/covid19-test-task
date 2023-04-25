@@ -21,7 +21,7 @@ export default function TemporaryDrawer({setState, state, toggleDrawer}) {
       onKeyDown={toggleDrawer(anchor, false)}
     >
       <List>
-        {['Worldwide', 'CountryStats', 'About', 'End'].map((text, index) => (
+        {['Worldwide', 'CountryStats', 'About',].map((text, index) => (
           <ListItem key={text} disablePadding>
             <ListItemButton href={`/${text.toLowerCase()}`}>
               <ListItemIcon>
@@ -33,18 +33,7 @@ export default function TemporaryDrawer({setState, state, toggleDrawer}) {
         ))}
       </List>
       <Divider />
-      <List>
-        {['All mail', 'Trash', 'Spam'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+      
     </Box>
   );
 

@@ -23,7 +23,7 @@
 //   // useEffect(() => {
 //   //   fetchData();
 //   // }, [dateFrom, dateTo]);
-  
+
 //   const fetchData = async () => {
 //     const response = await fetch(
 //       `https://api.covid19api.com/world`
@@ -137,8 +137,13 @@ const Worldwide = () => {
 
   const fetchData = async () => {
     const response = await fetch(
-      `https://api.covid19api.com/world?from=${dateFrom}&to=${dateTo}`
+      `https://api.covid19api.com/world?from=${encodeURIComponent(
+        dateFrom
+      )}&to=${encodeURIComponent(dateTo)}&case=${encodeURIComponent(
+        selectedCase
+      )}`
     );
+
     const jsonData = await response.json();
     const sortedData = jsonData.sort(
       (a, b) => new Date(a.Date) - new Date(b.Date)
@@ -216,4 +221,3 @@ const Worldwide = () => {
 };
 
 export default Worldwide;
-

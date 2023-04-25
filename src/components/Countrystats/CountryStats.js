@@ -4,22 +4,23 @@ import "./CountryStats.css";
 
 const CountryStats = () => {
   const [data, setData] = useState([]);
-  const [country, setCountry] = useState("");
   const [countries, setCountries] = useState([]);
-  const [dateFrom, setDateFrom] = useState("");
-  const [cases, setCases] = useState("");
+  const [country, setCountry] = useState("");
+  const [dateFrom, setDateFrom] = useState("2020-01-01T00:00:00Z");
+  const [cases, setCases] = useState("Confirmed");
 
+  // Перевіряємо, чи є список країн в sessionStorage
   useEffect(() => {
     const cachedCountries = sessionStorage.getItem("countries");
     if (cachedCountries) {
       setCountries(JSON.parse(cachedCountries));
     } else {
-      // If countries list is not cached in sessionStorage, fetch it from API
+      // Якщо списку країн немає в sessionStorage, отримуємо його з API
       fetch("https://api.covid19api.com/countries")
         .then((response) => response.json())
         .then((data) => {
           setCountries(data);
-          // Cache the countries list in sessionStorage
+          // Зберігаємо список країн в sessionStorage
           sessionStorage.setItem("countries", JSON.stringify(data));
         });
     }
@@ -27,63 +28,108 @@ const CountryStats = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let apiUrl = `https://api.covid19api.com/live/country/${country}`;
-    if (dateFrom) {
-      apiUrl += `?date_from=${dateFrom}`;
-    }
-    if (cases) {
-      apiUrl += `${dateFrom ? "&" : "?"}status=${cases}`;
-    }
-    const response = await fetch(apiUrl);
+    const response = await fetch(
+      `https://api.covid19api.com/country/${country}?from=${dateFrom}&to=2023-04-24T00:00:00Z&status=${cases}`
+    );
     const jsonData = await response.json();
     setData(jsonData);
+  
+    // Передаємо параметри у GET запиті
+    const queryParams = new URLSearchParams({
+      country,
+      dateFrom,
+      cases,
+    });
+    window.history.replaceState(null, null, `?${queryParams}`);
   };
+  
+
+  // Отримуємо параметри GET запиту при завантаженні компонента
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const countryParam = urlParams.get("country");
+    const dateFromParam = urlParams.get("dateFrom");
+    const casesParam = urlParams.get("cases");
+
+    if (countryParam) {
+      setCountry(countryParam);
+    }
+    if (dateFromParam) {
+      setDateFrom(dateFromParam);
+    }
+    if (casesParam) {
+      setCases(casesParam);
+    }
+  }, []);
+
+  // Оновлюємо GET параметри при зміні вибраних значень
+  useEffect(() => {
+    const queryParams = new URLSearchParams({
+      country,
+      dateFrom,
+      cases,
+    });
+    window.history.replaceState(null, null, `?${queryParams}`);
+  }, [country, dateFrom, cases]);
 
   return (
     <div className="country-container">
-      <h1>Live Statistics</h1>
+      <h1>Country Statistics of {country}</h1>
       <div className="chart-container">
         <form onSubmit={handleSubmit}>
-          <label htmlFor="country">Select a country:</label>
+          <label htmlFor="country">Enter a country:</label>
           <select
             id="country"
             value={country}
             onChange={(e) => setCountry(e.target.value)}
           >
-            {countries.map((c) => (
-              <option key={c.ISO2} value={c.Slug}>
-                {c.Country}
+            <option value="">--Please choose a country--</option>
+            {countries.map((country) => (
+              <option key={country.Slug} value={country.Slug}>
+                {country.Country}
               </option>
             ))}
           </select>
-          <label htmlFor="date">From date:</label>
+
+          <label htmlFor="dateFrom">Select a date from:</label>
           <input
+            id="dateFrom"
             type="date"
-            id="date"
-            value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
+            value={dateFrom.slice(0, 10)}
+            onChange={(e) => setDateFrom(e.target.value + "T00:00:00Z")}
+            max="2023-04-24"
           />
+
           <label htmlFor="cases">Select cases:</label>
           <select
             id="cases"
             value={cases}
             onChange={(e) => setCases(e.target.value)}
           >
-            <option value="">All</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="deaths">Deaths</option>
-            <option value="recovered">Recovered</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Deaths">Deaths</option>
+            <option value="Recovered">Recovered</option>
           </select>
-          <button type="submit">Show stats</button>
+
+          <button type="submit">Submit</button>
         </form>
-        <LineChart width={900} height={400} data={data}>
+
+        <LineChart
+          width={800}
+          height={500}
+          data={data}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        >
           <XAxis dataKey="Date" />
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="Confirmed" stroke="#8884d8" />
-          <Line type="monotone" dataKey="Deaths" stroke="#82ca9d" />
-          <Line type="monotone" dataKey="Recovered" stroke="#ffc658" />
+          <Line
+            type="monotone"
+            dataKey={cases}
+            stroke="#8884d8"
+            activeDot={{ r: 8 }}
+          />
         </LineChart>
       </div>
     </div>
