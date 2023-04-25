@@ -9,18 +9,15 @@ const CountryStats = () => {
   const [dateFrom, setDateFrom] = useState("2020-01-01T00:00:00Z");
   const [cases, setCases] = useState("Confirmed");
 
-  // Перевіряємо, чи є список країн в sessionStorage
   useEffect(() => {
     const cachedCountries = sessionStorage.getItem("countries");
     if (cachedCountries) {
       setCountries(JSON.parse(cachedCountries));
     } else {
-      // Якщо списку країн немає в sessionStorage, отримуємо його з API
       fetch("https://api.covid19api.com/countries")
         .then((response) => response.json())
         .then((data) => {
           setCountries(data);
-          // Зберігаємо список країн в sessionStorage
           sessionStorage.setItem("countries", JSON.stringify(data));
         });
     }
@@ -34,7 +31,6 @@ const CountryStats = () => {
     const jsonData = await response.json();
     setData(jsonData);
   
-    // Передаємо параметри у GET запиті
     const queryParams = new URLSearchParams({
       country,
       dateFrom,
@@ -44,7 +40,6 @@ const CountryStats = () => {
   };
   
 
-  // Отримуємо параметри GET запиту при завантаженні компонента
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const countryParam = urlParams.get("country");
@@ -62,7 +57,6 @@ const CountryStats = () => {
     }
   }, []);
 
-  // Оновлюємо GET параметри при зміні вибраних значень
   useEffect(() => {
     const queryParams = new URLSearchParams({
       country,
@@ -111,7 +105,7 @@ const CountryStats = () => {
             <option value="Recovered">Recovered</option>
           </select>
 
-          <button type="submit">Submit</button>
+          <button type="submit">Show stats</button>
         </form>
 
         <LineChart
